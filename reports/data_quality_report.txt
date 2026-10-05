@@ -1,0 +1,149 @@
+
+======================================================================
+1. BASIC STRUCTURE
+======================================================================
+Shape (rows, columns): (7043, 21)
+
+Data types:
+customerID              str
+gender                  str
+SeniorCitizen         int64
+Partner                 str
+Dependents              str
+tenure                int64
+PhoneService            str
+MultipleLines           str
+InternetService         str
+OnlineSecurity          str
+OnlineBackup            str
+DeviceProtection        str
+TechSupport             str
+StreamingTV             str
+StreamingMovies         str
+Contract                str
+PaperlessBilling        str
+PaymentMethod           str
+MonthlyCharges      float64
+TotalCharges            str
+Churn                   str
+
+======================================================================
+2. MISSING VALUES: what pandas reports
+======================================================================
+Total null cells reported by pandas: 0
+(no columns with nulls)
+
+======================================================================
+3. HIDDEN MISSING VALUES: blank / whitespace / placeholder text
+======================================================================
+Pandas only counts real NaN as null. A cell containing ' ' is NOT null.
+  TotalCharges: blank/whitespace-only=11, placeholder-like=0, leading/trailing spaces (non-blank)=0
+
+======================================================================
+4. WHY IS TotalCharges NOT NUMERIC?
+======================================================================
+TotalCharges dtype: str
+Blank/whitespace TotalCharges cells: 11
+NaN after pd.to_numeric(errors='coerce'): 11
+Cells that FAILED to convert but are NOT blank: 0
+  -> Good: every conversion failure is a blank cell, nothing else.
+
+Rows with blank TotalCharges:
+      customerID  tenure  MonthlyCharges TotalCharges Churn
+488   4472-LVYGI       0           52.55                 No
+753   3115-CZMZD       0           20.25                 No
+936   5709-LVOEQ       0           80.85                 No
+1082  4367-NUYAO       0           25.75                 No
+1340  1371-DWPAZ       0           56.05                 No
+3331  7644-OMVMY       0           19.85                 No
+3826  3213-VVOLG       0           25.35                 No
+4380  2520-SGTTA       0           20.00                 No
+5218  2923-ARZLG       0           19.70                 No
+6670  4075-WKNIU       0           73.35                 No
+6754  2775-SEFEE       0           61.90                 No
+
+Unique tenure values among these rows: [0]
+Churn values among these rows: {'No': 11}
+
+Rows with tenure == 0: 11
+Of those, rows with a NON-blank TotalCharges: 0
+Blank TotalCharges AND tenure == 0: 11
+  -> Blank TotalCharges <=> tenure == 0 exactly. Missingness has a clear cause (customer not billed yet), so 0 is a justified value.
+
+======================================================================
+5. DUPLICATES
+======================================================================
+Fully duplicated rows: 0
+Duplicated customerID values: 0
+Rows identical in all columns EXCEPT customerID: 22  (informational only: different customers can legitimately share the same profile, so we do NOT drop these)
+
+======================================================================
+6. INVALID / UNEXPECTED VALUES
+======================================================================
+Distinct values of each text column (small ones listed in full):
+  gender (2): ['Female', 'Male']
+  Partner (2): ['No', 'Yes']
+  Dependents (2): ['No', 'Yes']
+  PhoneService (2): ['No', 'Yes']
+  MultipleLines (3): ['No', 'No phone service', 'Yes']
+  InternetService (3): ['DSL', 'Fiber optic', 'No']
+  OnlineSecurity (3): ['No', 'No internet service', 'Yes']
+  OnlineBackup (3): ['No', 'No internet service', 'Yes']
+  DeviceProtection (3): ['No', 'No internet service', 'Yes']
+  TechSupport (3): ['No', 'No internet service', 'Yes']
+  StreamingTV (3): ['No', 'No internet service', 'Yes']
+  StreamingMovies (3): ['No', 'No internet service', 'Yes']
+  Contract (3): ['Month-to-month', 'One year', 'Two year']
+  PaperlessBilling (2): ['No', 'Yes']
+  PaymentMethod (4): ['Bank transfer (automatic)', 'Credit card (automatic)', 'Electronic check', 'Mailed check']
+  Churn (2): ['No', 'Yes']
+
+Numeric ranges:
+  SeniorCitizen: min=0, max=1
+  tenure: min=0, max=72
+  MonthlyCharges: min=18.25, max=118.75
+  TotalCharges (valid numbers only): min=18.8, max=8684.8
+  SeniorCitizen values: [0, 1]
+  Negative tenure: 0 | MonthlyCharges <= 0: 0 | TotalCharges < 0: 0
+
+Logical consistency checks (0 violations expected):
+  PhoneService=No but MultipleLines not 'No phone service': 0
+  PhoneService=Yes but MultipleLines='No phone service':    0
+  OnlineSecurity: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+  OnlineBackup: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+  DeviceProtection: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+  TechSupport: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+  StreamingTV: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+  StreamingMovies: InternetService=No mismatches=0, has-internet-but-'No internet service'=0
+
+TotalCharges / (tenure x MonthlyCharges), informational (not a rule: prices change over time):
+count    7032.000
+mean        1.000
+std         0.051
+min         0.689
+25%         0.980
+50%         1.000
+75%         1.020
+max         1.573
+
+======================================================================
+7. TARGET DISTRIBUTION (raw)
+======================================================================
+Churn
+No     5174
+Yes    1869
+Churn
+No     0.7346
+Yes    0.2654
+
+======================================================================
+8. RESULT OF clean_data() (the function the pipeline uses)
+======================================================================
+Shape after cleaning: (7043, 20)
+customerID dropped: True
+TotalCharges dtype: float64
+TotalCharges NaN remaining: 11
+Churn values after mapping: [0, 1]
+Churn rate (share of 1s): 0.2654
+
+NOTE: the remaining NaNs are deliberately NOT filled here. The model pipeline sets TotalCharges=0 only where tenure==0 (justified above) and uses a median imputer, fitted on TRAINING data only, for anything else. Filling with a median now, before the split, would leak information.

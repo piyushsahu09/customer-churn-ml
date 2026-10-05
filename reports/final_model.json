@@ -1,0 +1,15 @@
+{
+  "selected_model": "Logistic Regression",
+  "best_params": {
+    "model__C": 6.128528947223795
+  },
+  "cv_roc_auc": 0.8458215079654086,
+  "decision_threshold": 0.5,
+  "test_metrics": {
+    "Accuracy": 0.741,
+    "Precision": 0.5077,
+    "Recall": 0.7888,
+    "F1": 0.6178,
+    "ROC-AUC": 0.8415
+  }
+}
