@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Secrets (never commit these)
+.env
+*.key
+secrets.toml
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# NOTE: models/churn_model.pkl is intentionally NOT ignored so the app can be
+# deployed from GitHub. Remove it from the repo if you prefer to rebuild in CI.
+
+data/*.csv
